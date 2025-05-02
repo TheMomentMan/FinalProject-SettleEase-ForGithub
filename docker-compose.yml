@@ -1,16 +1,34 @@
 version: '3.8'
 
 services:
+  app:
+    build:
+      context: .
+    container_name: settleease_app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    command: npm start
+    depends_on:
+      - db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-settleease}
+      MYSQL_USER: ${MYSQL_USER:-settleease_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-settleease_password}
+
   db:
     image: mysql:8.0
     platform: linux/arm64/v8
     container_name: settleease_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-settleease}
+      MYSQL_USER: ${MYSQL_USER:-settleease_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-settleease_password}
     ports:
       - "3306:3306"
     volumes:
@@ -28,7 +46,7 @@ services:
       PMA_ARBITRARY: 1
     restart: always
     ports:
-      - 8080:80
+      - "8080:80"
 
 volumes:
-  mysql_data: 
+  mysql_data:
