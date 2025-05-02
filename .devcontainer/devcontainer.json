@@ -9,6 +9,9 @@
     "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
   "mounts": [
+    // bind your project (and its .env) into /workspace
+    "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    // bind the host docker socket so you can docker-in-docker
     "source=/var/run/docker-host.sock,target=/var/run/docker.sock,type=bind"
   ],
   "customizations": {
@@ -17,8 +20,20 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "ms-azuretools.vscode-docker"
-      ]
+      ],
+      "settings": {
+        // tell the Docker extension to use your .env when spinning up compose
+        "docker.composeCommand": "docker compose --env-file .env"
+      }
     }
+  },
+  // ensure your app always sees the right MySQL vars
+  "containerEnv": {
+    "MYSQL_HOST": "db",
+    "MYSQL_DATABASE": "${localEnv:MYSQL_DATABASE}",
+    "MYSQL_USER": "${localEnv:MYSQL_USER}",
+    "MYSQL_PASSWORD": "${localEnv:MYSQL_PASSWORD}",
+    "MYSQL_ROOT_PASSWORD": "${localEnv:MYSQL_ROOT_PASSWORD}"
   },
   "postCreateCommand": "npm install",
   "remoteUser": "node"
