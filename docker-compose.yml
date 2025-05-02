@@ -1,23 +1,26 @@
 version: '3.8'
 
 services:
-  app:
+  settleease:
     build:
-      context: .
+      context: .               # your repo root
+      dockerfile: Dockerfile  # or wherever your Dockerfile lives
+    image: settleease:dev
     container_name: settleease_app
-    ports:
-      - "3000:3000"
+    command: npm run dev      # or your start script
     volumes:
-      - .:/workspace
-    working_dir: /workspace
-    command: npm start
+      - ./:/workspace
+      - /workspace/node_modules
+    ports:
+      - "3000:3000"           # adjust to your app’s port
+    environment:
+      MYSQL_HOST: db
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     depends_on:
       - db
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-settleease}
-      MYSQL_USER: ${MYSQL_USER:-settleease_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-settleease_password}
 
   db:
     image: mysql:8.0
@@ -25,10 +28,10 @@ services:
     container_name: settleease_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-settleease}
-      MYSQL_USER: ${MYSQL_USER:-settleease_user}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-settleease_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
@@ -38,7 +41,7 @@ services:
   phpmyadmin:
     image: arm64v8/phpmyadmin:latest
     container_name: settleease_phpmyadmin
-    links:
+    depends_on:
       - db
     environment:
       PMA_HOST: db
